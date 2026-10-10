@@ -1,0 +1,350 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#F4845F">
+<title>TOONHUB — 3D Figurines</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--ease:cubic-bezier(.4,0,.2,1)}
+html,body,#root{width:100%;height:100%;margin:0}
+body{font-family:'Inter',sans-serif;color:white;overflow:hidden}
+button,a{-webkit-tap-highlight-color:transparent}
+
+.hero{
+ position:relative;width:100%;height:100vh;height:100dvh;
+ overflow:hidden;isolation:isolate;background:#F4845F;
+ transition:background-color 650ms var(--ease)
+}
+.grain{
+ position:absolute;inset:0;z-index:50;pointer-events:none;opacity:.4;
+ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.08'/%3E%3C/svg%3E");
+ background-size:200px 200px
+}
+.ghost-text{
+ position:absolute;top:18%;left:0;width:100%;
+ display:flex;justify-content:center;align-items:center;
+ z-index:2;pointer-events:none;user-select:none;
+ color:white;font-family:'Anton',sans-serif;
+ font-size:clamp(90px,28vw,380px);font-weight:900;
+ line-height:1;letter-spacing:-.02em;white-space:nowrap
+}
+.brand{
+ position:absolute;top:24px;left:16px;z-index:60;
+ font-size:12px;font-weight:600;letter-spacing:.18em;
+ text-transform:uppercase;opacity:.9
+}
+.carousel{position:absolute;inset:0;z-index:3}
+.character{
+ position:absolute;aspect-ratio:.6 / 1;
+ will-change:transform,filter,opacity;
+ transition:transform 650ms var(--ease),filter 650ms var(--ease),
+ opacity 650ms var(--ease),left 650ms var(--ease),
+ height 650ms var(--ease),bottom 650ms var(--ease);
+ pointer-events:none
+}
+.character img{
+ display:block;width:100%;height:100%;object-fit:contain;
+ object-position:bottom center;user-select:none;
+ -webkit-user-drag:none
+}
+.details{
+ position:absolute;z-index:60;left:16px;bottom:24px;
+ width:min(320px,calc(100% - 32px))
+}
+.details h2{
+ margin-bottom:12px;font-size:22px;font-weight:700;
+ letter-spacing:.02em;text-transform:uppercase;opacity:.95
+}
+.description{
+ margin-bottom:20px;font-size:14px;line-height:1.6;opacity:.85
+}
+.controls{display:flex;align-items:center;gap:16px}
+.nav-btn{
+ display:flex;align-items:center;justify-content:center;
+ flex:0 0 auto;width:64px;height:64px;border:2px solid white;
+ border-radius:50%;color:white;background:transparent;cursor:pointer;
+ transition:transform 150ms ease,background-color 150ms ease
+}
+.nav-btn:hover{transform:scale(1.08);background:rgba(255,255,255,.12)}
+.nav-btn:active{transform:scale(.96)}
+.nav-btn:disabled{cursor:not-allowed}
+.nav-btn svg,.discover svg{
+ fill:none;stroke:currentColor;stroke-width:2.25;
+ stroke-linecap:round;stroke-linejoin:round
+}
+.nav-btn svg{width:26px;height:26px}
+.discover{
+ position:absolute;z-index:60;right:40px;bottom:80px;
+ display:flex;align-items:center;gap:12px;color:white;
+ font-family:'Anton',sans-serif;font-size:clamp(20px,4vw,56px);
+ font-weight:400;letter-spacing:-.02em;line-height:1;
+ text-decoration:none;opacity:.95;
+ transition:opacity 200ms ease,transform 200ms ease
+}
+.discover:hover{opacity:1;transform:translateX(-3px)}
+.discover svg{width:32px;height:32px;flex-shrink:0}
+.status{
+ position:absolute;top:50%;left:50%;z-index:55;
+ transform:translate(-50%,-50%);font-size:12px;
+ opacity:0;pointer-events:none;text-align:center;
+ width:90%
+}
+
+@media(max-width:639px){
+ .brand{top:24px;left:16px}
+ .ghost-text{top:23%;font-size:clamp(74px,23vw,150px)}
+ .details{
+  left:16px;bottom:max(24px,env(safe-area-inset-bottom));
+  width:55%;max-width:250px
+ }
+ .details h2{margin-bottom:12px;font-size:16px;line-height:1.3}
+ .description{display:none}
+ .controls{gap:12px}
+ .nav-btn{width:48px;height:48px}
+ .discover{
+  right:16px;bottom:max(30px,env(safe-area-inset-bottom));
+  gap:6px;font-size:clamp(20px,5.5vw,32px)
+ }
+ .discover svg{width:20px;height:20px}
+}
+@media(max-width:360px){
+ .details{width:53%}
+ .details h2{font-size:14px}
+ .nav-btn{width:42px;height:42px}
+ .discover{font-size:19px}
+}
+@media(prefers-reduced-motion:reduce){
+ .hero,.character,.nav-btn,.discover{transition-duration:.01ms!important}
+}
+</style>
+</head>
+
+<body>
+<main class="hero" id="hero">
+
+ <div class="grain" aria-hidden="true"></div>
+ <div class="ghost-text" aria-hidden="true">3D SHAPE</div>
+ <header class="brand">TOONHUB</header>
+ <div class="carousel" id="carousel"></div>
+
+ <div class="status" id="status" role="status">
+  Loading figurines...
+ </div>
+
+ <section class="details">
+  <h2>TOONHUB FIGURINES</h2>
+  <p class="description">
+   The artwork is stunning, shipped fully prepared.
+   The finish is a vision, the 3D craft is flawless.
+   Many thanks! Wishing you the win. Order now.
+  </p>
+
+  <div class="controls">
+   <button class="nav-btn" id="prevBtn" aria-label="Previous figurine">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+     <path d="M19 12H5"></path>
+     <path d="m12 19-7-7 7-7"></path>
+    </svg>
+   </button>
+
+   <button class="nav-btn" id="nextBtn" aria-label="Next figurine">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+     <path d="M5 12h14"></path>
+     <path d="m12 5 7 7-7 7"></path>
+    </svg>
+   </button>
+  </div>
+ </section>
+
+ <!-- Your Instagram profile link -->
+ <a class="discover"
+    href="https://www.instagram.com/dev___nayak___18/"
+    target="_blank"
+    rel="noopener noreferrer"
+    aria-label="Visit Dev Nayak Instagram profile">
+  <span>DISCOVER IT</span>
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+   <path d="M5 12h14"></path>
+   <path d="m12 5 7 7-7 7"></path>
+  </svg>
+ </a>
+
+</main>
+
+<script>
+"use strict";
+
+const IMAGES = [
+ {
+  src:"https://fifth-gentle-45902158.figma.site/_components/v2/4de492f6d9cf8244ad5293233e5c6f52407d42fc/1.02464a56.png",
+  bg:"#F4845F",panel:"#F79B7F"
+ },
+ {
+  src:"https://fifth-gentle-45902158.figma.site/_components/v2/4de492f6d9cf8244ad5293233e5c6f52407d42fc/2.b977faab.png",
+  bg:"#6BBF7A",panel:"#85CC92"
+ },
+ {
+  src:"https://fifth-gentle-45902158.figma.site/_components/v2/4de492f6d9cf8244ad5293233e5c6f52407d42fc/3.4df853b4.png",
+  bg:"#E882B4",panel:"#ED9DC4"
+ },
+ {
+  src:"https://fifth-gentle-45902158.figma.site/_components/v2/4de492f6d9cf8244ad5293233e5c6f52407d42fc/4.4457fbce.png",
+  bg:"#6EB5FF",panel:"#8DC4FF"
+ }
+];
+
+const hero=document.getElementById("hero");
+const carousel=document.getElementById("carousel");
+const prevBtn=document.getElementById("prevBtn");
+const nextBtn=document.getElementById("nextBtn");
+const status=document.getElementById("status");
+
+let activeIndex=0;
+let isAnimating=false;
+let isMobile=window.innerWidth<640;
+let animationTimer=null;
+
+// Preload all four images.
+IMAGES.forEach(item=>{
+ const image=new Image();
+ image.src=item.src;
+});
+
+// Create the four characters.
+const characters=IMAGES.map((item,index)=>{
+ const character=document.createElement("div");
+ character.className="character";
+
+ const img=document.createElement("img");
+ img.src=item.src;
+ img.alt="TOONHUB figurine "+(index+1);
+ img.draggable=false;
+ img.decoding="async";
+
+ img.addEventListener("load",()=>{
+  status.style.opacity="0";
+ });
+
+ img.addEventListener("error",()=>{
+  status.textContent="Image could not load. Check your internet connection.";
+  status.style.opacity="1";
+ });
+
+ character.appendChild(img);
+ carousel.appendChild(character);
+ return character;
+});
+
+function getRole(index){
+ if(index===activeIndex)return "center";
+ if(index===(activeIndex+3)%4)return "left";
+ if(index===(activeIndex+1)%4)return "right";
+ return "back";
+}
+
+function applyStyle(character,role){
+ let left="50%";
+ let height;
+ let bottom;
+ let scale=1;
+ let blur=0;
+ let opacity=1;
+ let zIndex=5;
+
+ if(role==="center"){
+  scale=isMobile?1.25:1.68;
+  height=isMobile?"60%":"92%";
+  bottom=isMobile?"22%":"0";
+  zIndex=20;
+ }
+
+ if(role==="left"||role==="right"){
+  left=role==="left"
+   ?(isMobile?"20%":"30%")
+   :(isMobile?"80%":"70%");
+  height=isMobile?"16%":"28%";
+  bottom=isMobile?"32%":"12%";
+  blur=2;
+  opacity=.85;
+  zIndex=10;
+ }
+
+ if(role==="back"){
+  height=isMobile?"13%":"22%";
+  bottom=isMobile?"32%":"12%";
+  blur=4;
+  opacity=1;
+  zIndex=5;
+ }
+
+ character.style.left=left;
+ character.style.height=height;
+ character.style.bottom=bottom;
+ character.style.transform=`translateX(-50%) scale(${scale})`;
+ character.style.filter=`blur(${blur}px)`;
+ character.style.opacity=opacity;
+ character.style.zIndex=zIndex;
+ character.setAttribute("aria-hidden",role==="center"?"false":"true");
+}
+
+function renderCarousel(){
+ hero.style.backgroundColor=IMAGES[activeIndex].bg;
+
+ characters.forEach((character,index)=>{
+  applyStyle(character,getRole(index));
+ });
+}
+
+function navigate(direction){
+ if(isAnimating)return;
+
+ isAnimating=true;
+ prevBtn.disabled=true;
+ nextBtn.disabled=true;
+
+ activeIndex=direction==="next"
+  ?(activeIndex+1)%4
+  :(activeIndex+3)%4;
+
+ renderCarousel();
+
+ if(animationTimer!==null)clearTimeout(animationTimer);
+
+ animationTimer=setTimeout(()=>{
+  isAnimating=false;
+  prevBtn.disabled=false;
+  nextBtn.disabled=false;
+  animationTimer=null;
+ },650);
+}
+
+prevBtn.addEventListener("click",()=>navigate("prev"));
+nextBtn.addEventListener("click",()=>navigate("next"));
+
+window.addEventListener("resize",()=>{
+ const newMobile=window.innerWidth<640;
+
+ if(newMobile!==isMobile){
+  isMobile=newMobile;
+  renderCarousel();
+ }
+});
+
+window.addEventListener("keydown",event=>{
+ if(event.key==="ArrowLeft")navigate("prev");
+ if(event.key==="ArrowRight")navigate("next");
+});
+
+renderCarousel();
+</script>
+</body>
+  </html>
+  
